@@ -12,6 +12,14 @@
     <description>实时热门商品统计</description>
 
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+    </dependencies>
 
 
 </project>
