@@ -49,13 +49,13 @@ object HotItemsWithSql {
     // 基于DataStream创建Table
     val dataTable = tableEnv.fromDataStream(dataStream, 'itemId, 'behavior, 'timestamp.rowtime as 'ts)
 
-    // 1. Table API进行开窗聚合统计
+    // 1.1 Table API进行开窗聚合统计
     val aggTable = dataTable
       .filter('behavior === "pv")
       .window( Slide over 1.hours every 5.minutes on 'ts as 'sw )
       .groupBy( 'itemId, 'sw)
       .select( 'itemId, 'sw.end as 'windowEnd, 'itemId.count as 'cnt )
-    // 用SQL去实现TopN的选取
+    // 1.2 用SQL去实现TopN的选取
     tableEnv.createTemporaryView("aggtable", aggTable, 'itemId, 'windowEnd, 'cnt)
     val resultTable = tableEnv.sqlQuery(
       """
@@ -69,7 +69,7 @@ object HotItemsWithSql {
       """.stripMargin)
 
 
-    // 纯SQL实现
+    // 2. 纯SQL实现
     tableEnv.createTemporaryView("datatable", dataStream, 'itemId, 'behavior, 'timestamp.rowtime as 'ts)
     val resultSqlTable = tableEnv.sqlQuery(
       """

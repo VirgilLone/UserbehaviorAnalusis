@@ -122,7 +122,7 @@ class TopNHotItems(N: Int) extends KeyedProcessFunction[Tuple, ItemViewCount, St
   override def onTimer(timestamp: Long, ctx: KeyedProcessFunction[Tuple, ItemViewCount, String]#OnTimerContext, out: Collector[String]): Unit = {
 
     val allItemViewCounts: ListBuffer[ItemViewCount] = ListBuffer()
-    var iter: util.Iterator[ItemViewCount] = itemViewCountListState.get().iterator()
+    val iter: util.Iterator[ItemViewCount] = itemViewCountListState.get().iterator()
     while (iter.hasNext) {
       allItemViewCounts += iter.next()
     }
