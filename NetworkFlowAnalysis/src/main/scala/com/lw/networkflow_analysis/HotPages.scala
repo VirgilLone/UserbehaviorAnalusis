@@ -27,7 +27,9 @@ case class ApacheLogEvent(id: String, userId: String, timestamp: Long,
 
 case class PageViewCount(url: String, windowEnd: Long, count: Long)
 
-
+/**
+ * 通过tomcat或nginx日志统计实时热门页面
+ */
 object HotPages {
 
   def main(args: Array[String]): Unit = {

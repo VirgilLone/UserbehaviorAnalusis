@@ -28,7 +28,9 @@ case class UserBehavior(userId: Long, itemId: Long, categoryId: Int,
 //定义窗口聚合结果样例类
 case class ItemViewCount(itemId: Long, windowEnd: Long, count: Long)
 
-
+/**
+ * 根据用户行为日志统计热门商品
+ */
 object HotItems {
 
   def main(args: Array[String]): Unit = {
