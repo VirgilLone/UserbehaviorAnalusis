@@ -74,7 +74,7 @@ class Bloom(size: Long) extends Serializable{
 class UvCountWithBloom() extends ProcessWindowFunction[(String, Long), UvCount, String, TimeWindow]{
   // 定义redis连接以及布隆过滤器
   lazy val jedis = new Jedis("localhost", 6379)
-  lazy val bloomFilter = new Bloom(1<<29)    // 位的个数：2^6(64) * 2^20(1M) * 2^3(8bit) ,64MB
+  lazy val bloomFilter = new Bloom(1<<29)    // 位的个数：2^6(64) * 2^20(1M) * 2^3(8bit) = 2^29 ,64MB
 
   // 本来是收集齐所有数据、窗口触发计算的时候才会调用；现在每来一条数据都调用一次
   override def process(key: String, context: Context, elements: Iterable[(String, Long)], out: Collector[UvCount]): Unit = {
@@ -96,7 +96,7 @@ class UvCountWithBloom() extends ProcessWindowFunction[(String, Long), UvCount, 
     // 用redis的位操作命令，取bitmap中对应位的值
     val isExist: lang.Boolean = jedis.getbit(storedBitMapKey, offset)
     if(!isExist){
-      // 如果不存在，那么位图对应位置置1，并且将count值加1
+      // 如果不存在，那么位图对应位置置1，并且将hash中对应的key的count值加1
       jedis.setbit(storedBitMapKey, offset, true)
       jedis.hset(uvCountMap, currentKey, (count + 1).toString)
     }
