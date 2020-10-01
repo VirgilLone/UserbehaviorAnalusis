@@ -11,6 +11,12 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow
 import org.apache.flink.util.Collector
 import redis.clients.jedis.Jedis
 
+/**
+ * 统计一小时内的UV数。
+ * 小数据量下可以简单使用Set去重处理。但是上亿的数据量下一个窗口内的Long型Set数据就能达到
+ * 763M左右，考虑使用布隆过滤器进行去重并取count
+ *
+ */
 object UVWithBloom {
   def main(args: Array[String]): Unit = {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
@@ -92,11 +98,12 @@ class UvCountWithBloom() extends ProcessWindowFunction[(String, Long), UvCount, 
     // 去重：判断当前userId的hash值对应的位图位置，是否为0
     val userId = elements.last._2.toString
     // 计算hash值，就对应着位图中的偏移量
-    val offset = bloomFilter.hash(userId, 61)
+    val offset = bloomFilter.hash(userId, 12)
     // 用redis的位操作命令，取bitmap中对应位的值
     val isExist: lang.Boolean = jedis.getbit(storedBitMapKey, offset)
     if(!isExist){
       // 如果不存在，那么位图对应位置置1，并且将hash中对应的key的count值加1
+      // 如果在位图中存在(isExist为true)，则表示已经来过该userId，此时不做任何操作
       jedis.setbit(storedBitMapKey, offset, true)
       jedis.hset(uvCountMap, currentKey, (count + 1).toString)
     }
