@@ -45,6 +45,7 @@ object PV {
       .filter(_.behavior == "pv")
       //      .map(data => ("pv", 1L)) // 定义一个pv字符串作为分组的dummy key，但是所有数据会被分到同一个组
       .map(new MyMapper())
+//      .map(a=>(Random.nextString(10), 1L))
       .keyBy(_._1)
       .timeWindow(Time.hours(1)) // 1小时滚动窗口
       .aggregate(new PvCountAgg(), new PvCountWindowResult())
