@@ -9,7 +9,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>实时网络流量统计</artifactId>
+    <artifactId>NetworkFlowAnalysis</artifactId>
+
+    <description>实时网络流量统计</description>
 
     <dependencies>
         <dependency>
