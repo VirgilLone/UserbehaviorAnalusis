@@ -14,6 +14,7 @@
         <module>MarketAnalysis</module>
         <module>LoginFailDetect</module>
         <module>OrderPayDetect</module>
+        <module>realtime-order-monitoring</module>
     </modules>
 
     <properties>
