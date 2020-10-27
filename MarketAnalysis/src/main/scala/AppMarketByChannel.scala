@@ -70,7 +70,7 @@ class SimulatedSource() extends RichSourceFunction[MarketUserBehavior]{
   }
 }
 
-// 自定义ProcessWindowFunction
+// 自定义ProcessWindowFunction 全量聚合: 窗口需要维护全部原始数据，窗口触发进行全量聚合。
 class MarketCountByChannel() extends ProcessWindowFunction[MarketUserBehavior, MarketViewCount, (String, String), TimeWindow]{
   override def process(key: (String, String), context: Context, elements: Iterable[MarketUserBehavior], out: Collector[MarketViewCount]): Unit = {
     val start = new Timestamp(context.window.getStart).toString
