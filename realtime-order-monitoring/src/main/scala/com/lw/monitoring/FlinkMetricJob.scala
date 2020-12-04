@@ -13,7 +13,7 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
 import org.apache.flink.api.scala.typeutils.Types
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.TimeCharacteristic
+import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
@@ -42,6 +42,19 @@ object FlinkMetricJob {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
 //    env.setParallelism(1)
+
+    /*//jobManager给source任务触发checkpoint的时间间隔
+    env.enableCheckpointing(1000L)
+    env.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
+    env.getCheckpointConfig.setCheckpointTimeout(60000L)
+    env.getCheckpointConfig.setMaxConcurrentCheckpoints(2)
+    //前一个checkpoint的尾和后一个checkpoint的头最小间隔时间（会使MaxConcurrentCheckpoints配置失效）
+    env.getCheckpointConfig.setMinPauseBetweenCheckpoints(500L)
+    //更偏向使用checkpoint做故障恢复（即使savepoint更近）
+    env.getCheckpointConfig.setPreferCheckpointForRecovery(true)
+    //设置可容忍3次checkpoint
+    env.getCheckpointConfig.setTolerableCheckpointFailureNumber(3)*/
+
 
     val kafkaStream_user : DataStream[String] = env.addSource(new FlinkKafkaConsumer[String](config.getKafkaTopicUser, new SimpleStringSchema(), kafkaProperties))
     val kafkaStream_trade: DataStream[String] = env.addSource(new FlinkKafkaConsumer[String](config.getKafkaTopicTrade, new SimpleStringSchema(), kafkaProperties))
