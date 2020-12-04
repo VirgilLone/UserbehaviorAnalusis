@@ -1,5 +1,6 @@
 package com.lw.networkflow_analysis
 
+import java.net.URL
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Properties
@@ -8,14 +9,13 @@ import org.apache.flink.api.common.functions.AggregateFunction
 import org.apache.flink.api.common.serialization.SimpleStringSchema
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor, MapState, MapStateDescriptor}
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.TimeCharacteristic
+import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.scala.function.WindowFunction
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer
 import org.apache.flink.util.Collector
 
 import scala.collection.mutable.ListBuffer
@@ -38,8 +38,9 @@ object HotPages {
     env.setParallelism(1)
     env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
 
-    //    val inputStream = env.readTextFile("/Users/xyj/developer/idea_prj/UserbehaviorAnalusis/NetworkFlowAnalysis/src/main/resources/apache.log")
-    val inputStream = env.socketTextStream("localhost", 7777)
+    val resource = getClass.getResource("/apache.log")
+    val inputStream = env.readTextFile(resource.getPath)
+//    val inputStream = env.socketTextStream("localhost", 7777)
 
     val simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy:HH:mm:ss")
 
@@ -71,8 +72,8 @@ object HotPages {
       .keyBy(_.windowEnd)
       .process(new TopNHotPages(3))
 
-    dataStream.print("data")
-    aggStream.print("agg")
+//    dataStream.print("data")
+//    aggStream.print("agg")
     aggStream.getSideOutput(new OutputTag[ApacheLogEvent]("late_data")).print("late_data")
     resultStream.print()
     env.execute("hot pages job")
